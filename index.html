@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Script Hs - Versão Profissional Dark</title>
+    <!-- Meta tags para PWA -->
+    <meta name="theme-color" content="#121212">
+    <meta name="description" content="Painel profissional para execução de scripts JavaScript com tema dark.">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="icon-192.png" sizes="192x192">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Prism.js para destaque de sintaxe -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-dark.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #121212;
+            color: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .container {
+            max-width: 1000px;
+            margin-top: 50px;
+        }
+        .card {
+            box-shadow: 0 8px 16px rgba(0,0,0,0.4);
+            background-color: #1e1e1e;
+            border: 1px solid #333;
+            border-radius: 10px;
+        }
+        .card-header {
+            background: linear-gradient(135deg, #333, #555);
+            color: #ffffff;
+            border-bottom: 1px solid #444;
+            border-radius: 10px 10px 0 0;
+        }
+        .btn-custom {
+            margin: 5px;
+            border-radius: 5px;
+            font-weight: 500;
+        }
+        #resultado {
+            max-height: 500px;
+            overflow-y: auto;
+            background-color: #2a2a2a;
+            border: 1px solid #444;
+            border-radius: 5px;
+            padding: 15px;
+        }
+        .form-control {
+            background-color: #2a2a2a;
+            color: #ffffff;
+            border: 1px solid #555;
+            border-radius: 5px;
+        }
+        .form-control:focus {
+            background-color: #2a2a2a;
+            color: #ffffff;
+            border-color: #007bff;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
+        .alert {
+            border-radius: 5px;
+        }
+        .tooltip-inner {
+            background-color: #333;
+            color: #fff;
+        }
+        .tooltip-arrow::before {
+            border-top-color: #333;
+        }
+    </style>
+</head>
+<body data-bs-theme="dark">
+    <div class="container">
+        <div class="card">
+            <div class="card-header text-center">
+                <h3 class="card-title mb-0"><i class="bi bi-terminal"></i> Script Hs</h3>
+            </div>
+            <div class="card-body">
+                <!-- Campo para nome salvo -->
+                <div class="mb-3">
+                    <label for="nomeSalvo" class="form-label"><i class="bi bi-tag"></i> Nome Salvo</label>
+                    <input type="text" id="nomeSalvo" class="form-control" placeholder="Digite o nome para salvar" required data-bs-toggle="tooltip" title="Nome associado ao código principal">
+                </div>
+                
+                <!-- Campo para selecionar arquivo do script conect -->
+                <div class="mb-3">
+                    <label for="scriptConectFile" class="form-label"><i class="bi bi-file-earmark-code"></i> Selecionar Arquivo do Script Conect (.js)</label>
+                    <input type="file" id="scriptConectFile" class="form-control" accept=".js" required data-bs-toggle="tooltip" title="Selecione um arquivo JavaScript para o script de conexão">
+                </div>
+                
+                <!-- Área para o código principal -->
+                <div class="mb-3">
+                    <label for="codigoPrincipal" class="form-label"><i class="bi bi-code-slash"></i> Código Principal (JavaScript)</label>
+                    <textarea id="codigoPrincipal" class="form-control" rows="12" placeholder="Insira o código JavaScript principal aqui..." required data-bs-toggle="tooltip" title="Código JavaScript a ser executado"></textarea>
+                </div>
+                
+                <!-- Botões para executar scripts -->
+                <div class="d-flex justify-content-center flex-wrap">
+                    <button class="btn btn-success btn-custom" onclick="executarScriptConect()" data-bs-toggle="tooltip" title="Executa o script de conexão selecionado"><i class="bi bi-play-circle"></i> Script Conect</button>
+                    <button class="btn btn-primary btn-custom" onclick="executarCodigoPrincipal()" data-bs-toggle="tooltip" title="Executa o código principal e exibe detalhes"><i class="bi bi-play"></i> Executar Código Principal</button>
+                    <button class="btn btn-secondary btn-custom" onclick="salvarDados()" data-bs-toggle="tooltip" title="Salva os dados inseridos localmente"><i class="bi bi-save"></i> Salvar Dados</button>
+                    <button class="btn btn-warning btn-custom" onclick="carregarDados()" data-bs-toggle="tooltip" title="Carrega dados salvos anteriormente"><i class="bi bi-upload"></i> Carregar Dados</button>
+                </div>
+                
+                <!-- Área para exibir resultados -->
+                <div id="resultado" class="mt-4"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para detalhes de execução -->
+    <div class="modal fade" id="executionModal" tabindex="-1" aria-labelledby="executionModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content bg-dark text-white">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="executionModalLabel">Detalhes da Execução</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="modalBody">
+                    <!-- Conteúdo será inserido dinamicamente -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Prism.js para destaque de sintaxe -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+
+    <script>
+        // Inicializar tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+
+        // Registrar Service Worker para PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('sw.js')
+                    .then(function(registration) {
+                        console.log('Service Worker registrado com sucesso:', registration.scope);
+                    })
+                    .catch(function(error) {
+                        console.log('Falha ao registrar Service Worker:', error);
+                    });
+            });
+        }
+
+        // Função para executar o script de conexão (requer seleção de arquivo)
+        function executarScriptConect() {
+            const fileInput = document.getElementById('scriptConectFile');
+            const resultadoDiv = document.getElementById('resultado');
+            
+            if (!fileInput.files[0]) {
+                resultadoDiv.innerHTML = '<div class="alert alert-warning">Por favor, selecione um arquivo para o Script Conect.</div>';
+                return;
+            }
+            
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                const scriptContent = e.target.result;
+                try {
+                    eval(scriptContent); // Executa o conteúdo do arquivo
+                    resultadoDiv.innerHTML = '<div class="alert alert-info"><i class="bi bi-check-circle"></i> Script Conect executado: Conexão estabelecida com sucesso!</div>';
+                } catch (error) {
+                    resultadoDiv.innerHTML = `<div class="alert alert-danger"><i class="bi bi-exclamation-triangle"></i> Erro na execução do Script Conect: ${error.message}</div>`;
+                }
+            };
+            
+            reader.readAsText(file);
+        }
+
+        // Função para executar o código principal
+        function executarCodigoPrincipal() {
+            const nomeSalvo = document.getElementById('nomeSalvo').value.trim();
+            const codigo = document.getElementById('codigoPrincipal').value.trim();
+            const resultadoDiv = document.getElementById('resultado');
+            
+            if (!nomeSalvo) {
+                resultadoDiv.innerHTML = '<div class="alert alert-warning">Por favor, insira um nome salvo.</div>';
+                return;
+            }
+            
+            if (!codigo) {
+                resultadoDiv.innerHTML = '<div class="alert alert-warning">Por favor, insira o código principal.</div>';
+                return;
+            }
+            
+            // Exibir detalhes em um modal
+            const modalBody = document.getElementById('modalBody');
+            modalBody.innerHTML = `
+                <h5>Nome Salvo: <strong>${nomeSalvo}</strong></h5>
+                <h6>Código Completo:</h6>
+                <pre><code class="language-javascript">${codigo}</code></pre>
+                <div class="alert alert-success"><i class="bi bi-check-circle"></i> Código executado com sucesso!</div>
+            `;
+            
+            // Aplicar destaque de sintaxe
+            Prism.highlightAll();
+            
+            // Tentar executar o código JavaScript (usando eval - use com cautela em produção)
+            try {
+                eval(codigo);
+                resultadoDiv.innerHTML = '<div class="alert alert-success"><i class="bi bi-check-circle"></i> Código Principal executado com sucesso! Verifique o modal para detalhes.</div>';
+            } catch (error) {
+                modalBody.innerHTML += `<div class="alert alert-danger"><i class="bi bi-exclamation-triangle"></i> Erro na execução: ${error.message}</div>`;
+                resultadoDiv.innerHTML = '<div class="alert alert-danger"><i class="bi bi-exclamation-triangle"></i> Erro na execução do Código Principal. Verifique o modal para detalhes.</div>';
+            }
+            
+            // Mostrar modal
+            var myModal = new bootstrap.Modal(document.getElementById('executionModal'));
+            myModal.show();
+        }
+
+        // Função para salvar dados no localStorage
+        function salvarDados() {
+            const nomeSalvo = document.getElementById('nomeSalvo').value.trim();
+            const codigo = document.getElementById('codigoPrincipal').value.trim();
+            const resultadoDiv = document.getElementById('resultado');
+            
+            if (!nomeSalvo || !codigo) {
+                resultadoDiv.innerHTML = '<div class="alert alert-warning">Preencha o nome salvo e o código principal antes de salvar.</div>';
+                return;
+            }
+            
+            localStorage.setItem('nomeSalvo', nomeSalvo);
+            localStorage.setItem('codigoPrincipal', codigo);
+            resultadoDiv.innerHTML = '<div class="alert alert-success"><i class="bi bi-save"></i> Dados salvos com sucesso!</div>';
+        }
+
+        // Função para carregar dados do localStorage
+        function carregarDados() {
+            const nomeSalvo = localStorage.getItem('nomeSalvo');
+            const codigo = localStorage.getItem('codigoPrincipal');
+            const resultadoDiv = document.getElementById('resultado');
+            
+            if (nomeSalvo) document.getElementById('nomeSalvo').value = nomeSalvo;
+            if (codigo) document.getElementById('codigoPrincipal').value = codigo;
+            
+            resultadoDiv.innerHTML = '<div class="alert alert-info"><i class="bi bi-upload"></i> Dados carregados com sucesso!</div>';
+        }
+    </script>
+</body>
+</html>
